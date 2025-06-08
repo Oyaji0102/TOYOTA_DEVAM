@@ -27,22 +27,23 @@
     "expo-clipboard": "~7.1.4",
     "expo-font": "~13.3.1",
     "expo-linear-gradient": "~14.1.5",
+    "expo-local-authentication": "~16.0.4",
+    "expo-localization": "^16.1.5",
     "expo-notifications": "~0.31.3",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
+    "i18n-js": "^4.5.1",
     "memorystore": "^1.6.7",
     "react-native-gesture-handler": "^2.25.0",
     "react-native-reanimated": "^3.18.0",
     "react-native-safe-area-context": "^5.4.1",
-    "react-native-screens": "^4.11.1",
-    "expo-local-authentication": "~16.0.4"
+    "react-native-screens": "^4.11.1"
   },
   "resolutions": {
-  "react": "19.0.0",
-  "react-dom": "19.0.0"
-},
-"overrides": {
-  "react": "19.0.0"
-}
-
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "overrides": {
+    "react": "19.0.0"
+  }
 }

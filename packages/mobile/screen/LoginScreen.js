@@ -8,14 +8,16 @@ import {
   StyleSheet,
   Animated,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { login } from '../src/api';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-// Görselleri direkt doğru path ile içe aktar
+import i18n from '../src/i18n/i18n';
+import { useLanguage } from '../context/LanguageContext';
+
 import waveLight from '../assets/wave-light.png';
 import waveDark from '../assets/wave-dark.png';
 
@@ -27,6 +29,7 @@ export default function LoginScreen() {
 
   const { setUser, rememberedEmail, setRememberedEmail, biometricLogin } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
+  const { changeLanguage } = useLanguage();
 
   useEffect(() => {
     if (rememberedEmail) setEmail(rememberedEmail);
@@ -42,44 +45,41 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Uyarı', 'Lütfen email ve şifrenizi girin.');
+      Alert.alert(i18n.t('common.warning'), i18n.t('auth.fillFields'));
       return;
     }
 
     try {
       const res = await login(email, password, remember);
-        console.log("🔍 Giriş yanıtı:", res); // DEBUG
       if (res.success) {
         setUser(res.user);
         if (remember) setRememberedEmail(email);
       } else {
-        Alert.alert('Hata', 'Giriş başarısız.');
+        Alert.alert(i18n.t('common.error'), i18n.t('auth.failed'));
       }
     } catch (error) {
       const status = error.response?.status;
       const code = error.response?.data?.message;
       if (code === 'KULLANICI_BULUNAMADI') {
-        Alert.alert('Kullanıcı bulunamadı', 'Bu email adresine ait bir kullanıcı yok.');
+        Alert.alert(i18n.t('auth.userNotFound'), i18n.t('auth.userNotFound'));
       } else if (code === 'SIFRE_HATALI') {
-        Alert.alert('Şifre hatalı', 'Girdiğiniz şifre yanlış.');
+        Alert.alert(i18n.t('auth.wrongPassword'), i18n.t('auth.wrongPassword'));
       } else if (status === 500) {
-        Alert.alert('Sunucu Hatası', 'Sunucuda bir hata oluştu.');
+        Alert.alert(i18n.t('auth.serverError'), i18n.t('auth.serverError'));
       } else {
-        Alert.alert('Bağlantı Hatası', 'Sunucuya bağlanılamadı.');
+        Alert.alert(i18n.t('auth.connectionError'), i18n.t('auth.connectionError'));
       }
     }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      {/* Wave arka plan */}
       <ImageBackground
         source={theme.mode === 'dark' ? waveDark : waveLight}
         style={styles.waveBackground}
         resizeMode="cover"
       >
         <View style={[styles.overlay]}>
-          {/* Tema anahtarı */}
           <View style={styles.themeSwitcher}>
             <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
               <Switch
@@ -92,21 +92,30 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inner}>
-          <Text
-  style={[
-    styles.title,
-    {
-      color: theme.text,
-      fontFamily: 'Orbitron-Bold',
-      textShadowColor: theme.mode === 'dark' ? '#000' : '#ccc',
-      textShadowOffset: { width: 1, height: 2 },
-      textShadowRadius: 3,
-    },
-  ]}
->
-  🎮 GameCenter Giriş
-</Text>
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: theme.text,
+                  fontFamily: 'Orbitron-Bold',
+                  textShadowColor: theme.mode === 'dark' ? '#000' : '#ccc',
+                  textShadowOffset: { width: 1, height: 2 },
+                  textShadowRadius: 3,
+                },
+              ]}
+            >
+              {i18n.t('auth.welcome')}
+            </Text>
 
+            {/* Dil Seçici */}
+            <View style={{ flexDirection: 'row', justifyContent: 'center', marginBottom: 20 }}>
+              <TouchableOpacity onPress={() => changeLanguage('tr')} style={{ marginHorizontal: 10 }}>
+                <Text style={{ color: theme.text }}>🇹🇷 Türkçe</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => changeLanguage('en')} style={{ marginHorizontal: 10 }}>
+                <Text style={{ color: theme.text }}>🇬🇧 English</Text>
+              </TouchableOpacity>
+            </View>
 
             {rememberedEmail && (
               <TouchableOpacity
@@ -115,7 +124,7 @@ export default function LoginScreen() {
               >
                 <Text style={[styles.quickText, { color: theme.text }]}>🔓 {rememberedEmail}</Text>
                 <Text style={[styles.quickDesc, { color: theme.subtext }]}>
-                  Parmak izi ile hızlı giriş
+                  {i18n.t('auth.quickLogin')}
                 </Text>
               </TouchableOpacity>
             )}
@@ -146,7 +155,7 @@ export default function LoginScreen() {
                   borderColor: theme.border,
                 },
               ]}
-              placeholder="Şifre"
+              placeholder={i18n.t('auth.loginPassword')}
               placeholderTextColor={theme.placeholder}
               secureTextEntry
               value={password}
@@ -154,7 +163,7 @@ export default function LoginScreen() {
             />
 
             <View style={styles.switchRow}>
-              <Text style={[styles.switchText, { color: theme.text }]}>Beni Hatırla</Text>
+              <Text style={[styles.switchText, { color: theme.text }]}>{i18n.t('auth.rememberMe')}</Text>
               <Switch value={remember} onValueChange={setRemember} />
             </View>
 
@@ -167,20 +176,19 @@ export default function LoginScreen() {
                 }
                 style={styles.gradientButton}
               >
-               <Text
-  style={[
-    styles.buttonText,
-    {
-      fontFamily: 'Orbitron-Bold',
-      textShadowColor: theme.mode === 'dark' ? '#000' : '#333',
-      textShadowOffset: { width: 1, height: 1 },
-      textShadowRadius: 2,
-    },
-  ]}
->
-  Giriş Yap
-</Text>
-
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      fontFamily: 'Orbitron-Bold',
+                      textShadowColor: theme.mode === 'dark' ? '#000' : '#333',
+                      textShadowOffset: { width: 1, height: 1 },
+                      textShadowRadius: 2,
+                    },
+                  ]}
+                >
+                  {i18n.t('auth.login')}
+                </Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -245,7 +253,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 17,
-    
   },
   quickBox: {
     borderRadius: 10,

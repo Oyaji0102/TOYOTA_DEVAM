@@ -15,12 +15,13 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 import { logout, getGames } from '../src/api';
 import { AuthContext } from '../context/AuthContext';
 import { LobbyContext } from '../context/LobbyContext';
 import { GameContext } from '../context/GameContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import i18n from '../src/i18n/i18n';
 
 import LobbyModal from '../components/LobbyModal';
 import GameDetailModal from '../components/GameDetailModal';
@@ -37,12 +38,12 @@ const HomeScreen = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const [games, setGames] = useState([]);
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const slideAnim = useRef(new Animated.Value(300)).current; // başlangıç değeri 300
+  const slideAnim = useRef(new Animated.Value(300)).current;
 
   useEffect(() => {
     getGames()
       .then((data) => setGames(data))
-      .catch((err) => console.log("Oyunlar alınamadı:", err));
+      .catch((err) => console.log(i18n.t('home.errorLoadingGames'), err));
   }, []);
 
   useEffect(() => {
@@ -54,7 +55,7 @@ const HomeScreen = () => {
         useNativeDriver: true,
       }).start();
     } else {
-      slideAnim.setValue(300); // kapandığında sıfırla
+      slideAnim.setValue(300);
     }
   }, [menuVisible]);
 
@@ -70,7 +71,6 @@ const HomeScreen = () => {
     toggleTheme();
   };
 
-  
   const renderGame = ({ item }) => (
     <LinearGradient
       colors={theme.gradient}
@@ -111,7 +111,6 @@ const HomeScreen = () => {
       resizeMode="cover"
     >
       <View style={[styles.container, { backgroundColor: 'transparent' }]}>
-        {/* Tema Switch */}
         <View style={styles.themeSwitch}>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <Switch
@@ -124,90 +123,81 @@ const HomeScreen = () => {
         </View>
 
         <Text style={[styles.welcome, { color: theme.text }]}>
-          Hoş geldin, {user?.email} 🎮
+          {i18n.t('home.welcome')}, {user?.email} 🎮
         </Text>
 
         <FlatList
           data={games}
           renderItem={renderGame}
           keyExtractor={(item) => item.id}
-          numColumns={2}
           contentContainerStyle={{ paddingVertical: 10 }}
         />
 
- {/* Alt Menü */}
-<View style={[styles.tabBar, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
-  
-  {/* Sol: Menü Butonu */}
-  <TouchableOpacity style={styles.tabItem} onPress={() => setMenuVisible(true)}>
-    <Feather name="menu" size={24} color={theme.text} />
-    <Text style={[styles.tabText, { color: theme.text }]}>Menü</Text>
-  </TouchableOpacity>
+        <View style={[styles.tabBar, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
+          <TouchableOpacity style={styles.tabItem} onPress={() => setMenuVisible(true)}>
+            <Feather name="menu" size={24} color={theme.text} />
+            <Text style={[styles.tabText, { color: theme.text }]}>{i18n.t('common.menu')}</Text>
+          </TouchableOpacity>
 
-  {/* Orta: Lobi Butonu */}
-  <TouchableOpacity style={styles.lobbyButton} onPress={openLobbyModal}>
-    <Feather name="plus-circle" size={28} color="#fff" />
-    <Text style={styles.lobbyButtonText}>Lobi</Text>
-  </TouchableOpacity>
+          <TouchableOpacity style={styles.lobbyButton} onPress={openLobbyModal}>
+            <Feather name="plus-circle" size={28} color="#fff" />
+            <Text style={styles.lobbyButtonText}>{i18n.t('common.lobby')}</Text>
+          </TouchableOpacity>
 
-  {/* Sağ: Çıkış */}
-  <TouchableOpacity style={styles.tabItem} onPress={handleLogout}>
-    <Ionicons name="exit-outline" size={24} color={theme.text} />
-    <Text style={[styles.tabText, { color: theme.text }]}>Çıkış</Text>
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity style={styles.tabItem} onPress={handleLogout}>
+            <Ionicons name="exit-outline" size={24} color={theme.text} />
+            <Text style={[styles.tabText, { color: theme.text }]}>{i18n.t('auth.logout')}</Text>
+          </TouchableOpacity>
+        </View>
 
-<Modal
-  visible={menuVisible}
-  transparent
-  animationType="none"
-  onRequestClose={() => setMenuVisible(false)}
->
-  <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-    <View style={styles.modalOverlay}>
-      <Animated.View
-        style={[
-          styles.slideMenuBox,
-          {
-            backgroundColor: theme.surface,
-            transform: [{ translateY: slideAnim }],
-            shadowColor: theme.shadow,
-          },
-        ]}
-      >
-        <Text style={[styles.menuTitle, { color: theme.text }]}>Menü</Text>
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="none"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+            <View style={styles.modalOverlay}>
+              <Animated.View
+                style={[
+                  styles.slideMenuBox,
+                  {
+                    backgroundColor: theme.surface,
+                    transform: [{ translateY: slideAnim }],
+                    shadowColor: theme.shadow,
+                  },
+                ]}
+              >
+                <Text style={[styles.menuTitle, { color: theme.text }]}>{i18n.t('common.menu')}</Text>
 
-        <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Profile"); }}>
-          <Feather name="user" size={20} color={theme.text} style={styles.menuIcon} />
-          <Text style={[styles.menuItemText, { color: theme.text }]}>Profil</Text>
-        </Pressable>
+                <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Profile"); }}>
+                  <Feather name="user" size={20} color={theme.text} style={styles.menuIcon} />
+                  <Text style={[styles.menuItemText, { color: theme.text }]}>{i18n.t('common.profile')}</Text>
+                </Pressable>
 
-        <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Stats"); }}>
-          <Feather name="bar-chart-2" size={20} color={theme.text} style={styles.menuIcon} />
-          <Text style={[styles.menuItemText, { color: theme.text }]}>İstatistikler</Text>
-        </Pressable>
+                <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Stats"); }}>
+                  <Feather name="bar-chart-2" size={20} color={theme.text} style={styles.menuIcon} />
+                  <Text style={[styles.menuItemText, { color: theme.text }]}>{i18n.t('common.stats')}</Text>
+                </Pressable>
 
-        <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Chat"); }}>
-          <Feather name="message-circle" size={20} color={theme.text} style={styles.menuIcon} />
-          <Text style={[styles.menuItemText, { color: theme.text }]}>Sohbet</Text>
-        </Pressable>
+                <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Chat"); }}>
+                  <Feather name="message-circle" size={20} color={theme.text} style={styles.menuIcon} />
+                  <Text style={[styles.menuItemText, { color: theme.text }]}>{i18n.t('common.chat')}</Text>
+                </Pressable>
 
-        <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Lobbies"); }}>
-          <Feather name="layers" size={20} color={theme.text} style={styles.menuIcon} />
-          <Text style={[styles.menuItemText, { color: theme.text }]}>Lobiler</Text>
-        </Pressable>
+                <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Lobbies"); }}>
+                  <Feather name="layers" size={20} color={theme.text} style={styles.menuIcon} />
+                  <Text style={[styles.menuItemText, { color: theme.text }]}>{i18n.t('common.lobbies')}</Text>
+                </Pressable>
 
-        <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Achievements"); }}>
-          <Feather name="award" size={20} color={theme.text} style={styles.menuIcon} />
-          <Text style={[styles.menuItemText, { color: theme.text }]}>Başarımlar</Text>
-        </Pressable>
-      </Animated.View>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-
-
-
+                <Pressable style={styles.menuItemRow} onPress={() => { setMenuVisible(false); navigation.navigate("Achievements"); }}>
+                  <Feather name="award" size={20} color={theme.text} style={styles.menuIcon} />
+                  <Text style={[styles.menuItemText, { color: theme.text }]}>{i18n.t('common.achievements')}</Text>
+                </Pressable>
+              </Animated.View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         <LobbyModal />
         <GameDetailModal />
@@ -262,7 +252,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // 🌟 ALT MENÜ YENİ YAPI 🌟
   tabBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -290,7 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   lobbyButton: {
-    backgroundColor: '#4A90E2', // Temaya bağlı: theme.primary
+    backgroundColor: '#4A90E2',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -309,7 +298,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // 🎛️ Tema Switch
   themeSwitch: {
     position: 'absolute',
     top: 40,
@@ -317,7 +305,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
 
-  // 📂 Açılır Menü
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -383,6 +370,5 @@ const styles = StyleSheet.create({
   
   
 });
-
 
 export default HomeScreen;

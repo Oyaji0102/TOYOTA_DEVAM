@@ -10,6 +10,8 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { InteractionManager } from 'react-native';
+import { useLanguage } from '../../../context/LanguageContext';
+import i18n from '../../../src/i18n/i18n';
 
 const pastelColors = [
   '#FFD3B6', '#FFAAA5', '#FF8C94', '#DCE775', '#A5D6A7',
@@ -61,12 +63,11 @@ export default function TombalaGameScreen() {
   const timerRef = useRef(null);
   const cardBackground = useRef(pastelColors[Math.floor(Math.random() * pastelColors.length)]).current;
 
- const {
-  lobbyId = 'demo_lobby',
-  user = { email: 'kullanici@example.com' },
-  gameStarted = false, // ✅ Varsayılan olarak false
-} = route.params || {};
-
+  const {
+    lobbyId = 'demo_lobby',
+    user = { email: 'kullanici@example.com' },
+    gameStarted = false,
+  } = route.params || {};
 
   // 📦 Kart Yükle
   useEffect(() => {
@@ -89,27 +90,24 @@ export default function TombalaGameScreen() {
     const ws = new WebSocket(`ws://10.0.2.2:4000/lobby/${lobbyId}`);
     socketRef.current = ws;
 
-   ws.onopen = () => {
-  console.log('✅ WebSocket bağlı');
+    ws.onopen = () => {
+      console.log(i18n.t('games.tombala.websocketConnected'));
 
-  if (gameStarted) {
-    console.log('🟢 Oyun başlatıldı, otomatik sayı çekiliyor...');
-    sendDrawNumber();
-
-    if (!intervalRef.current) {
-      intervalRef.current = setInterval(() => {
+      if (gameStarted) {
+        console.log(i18n.t('games.tombala.gameStarted'));
         sendDrawNumber();
-      }, 15000);
-    }
-  }
-};
 
+        if (!intervalRef.current) {
+          intervalRef.current = setInterval(() => {
+            sendDrawNumber();
+          }, 15000);
+        }
+      }
+    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log('📩 Mesaj:', data);
-
-  
+      console.log(i18n.t('games.tombala.messageReceived'), data);
 
       if (data.type === 'newNumber') {
         const number = data.number;
@@ -120,32 +118,29 @@ export default function TombalaGameScreen() {
         resetMissTimer(number);
       }
 
-if (data.type === 'player_announcement') {
-  const message =
-    data.step === 'cinko1'
-      ? `🥇 ${data.user.email} → 1. Çinko yaptı!`
-      : `🥈 ${data.user.email} → 2. Çinko yaptı!`;
+      if (data.type === 'player_announcement') {
+        const message = data.step === 'cinko1'
+          ? i18n.t('games.tombala.firstBingo', { user: data.user.email })
+          : i18n.t('games.tombala.secondBingo', { user: data.user.email });
 
-  InteractionManager.runAfterInteractions(() => {
-    Alert.alert('📣 Çinko!', message);
-  });
+        InteractionManager.runAfterInteractions(() => {
+          Alert.alert(i18n.t('games.tombala.bingo'), message);
+        });
 
-  setAnnouncements(prev => [...prev, { step: data.step, email: data.user.email }]);
-}
+        setAnnouncements(prev => [...prev, { step: data.step, email: data.user.email }]);
+      }
 
-
-    if (data.type === 'game_over') {
-  setGameOverData({
-    winner: data.winner,
-  });
-}
-
+      if (data.type === 'game_over') {
+        setGameOverData({
+          winner: data.winner,
+        });
+      }
     };
 
-    ws.onerror = (e) => console.log('❌ WebSocket hata:', e.message);
+    ws.onerror = (e) => console.log(i18n.t('games.tombala.websocketError'), e.message);
 
     ws.onclose = () => {
-      console.log('🔌 WebSocket kapandı');
+      console.log(i18n.t('games.tombala.websocketClosed'));
       clearInterval(intervalRef.current);
     };
 
@@ -156,15 +151,14 @@ if (data.type === 'player_announcement') {
   }, []);
 
   const sendDrawNumber = () => {
-  if (socketRef.current?.readyState === WebSocket.OPEN) {
-    socketRef.current.send(JSON.stringify({
-      type: 'drawNumber',
-      lobbyId,
-    }));
-    console.log('📤 drawNumber gönderildi (otomatik)');
-  }
-};
-
+    if (socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({
+        type: 'drawNumber',
+        lobbyId,
+      }));
+      console.log(i18n.t('games.tombala.numberDrawn'));
+    }
+  };
 
   const startInterval = () => {
     if (intervalRef.current) return;
@@ -244,8 +238,6 @@ if (data.type === 'player_announcement') {
     </View>
   );
 
-  
-
   useEffect(() => {
     if (!activeNumber) return;
     const countdown = setInterval(() => {
@@ -268,47 +260,43 @@ if (data.type === 'player_announcement') {
         </View>
       )}
 
- {announcements.length > 0 && (
-  <View style={styles.announcementBox}>
-    {announcements.map((a, index) => (
-      <Text key={index} style={styles.announcementText}>
-        {a.step === 'cinko1' ? '🥇' : '🥈'} {a.email} {a.step.toUpperCase()} yaptı!
-      </Text>
-    ))}
-  </View>
-)}
+      {announcements.length > 0 && (
+        <View style={styles.announcementBox}>
+          {announcements.map((a, index) => (
+            <Text key={index} style={styles.announcementText}>
+              {a.step === 'cinko1' ? '🥇' : '🥈'} {a.email} {a.step.toUpperCase()} yaptı!
+            </Text>
+          ))}
+        </View>
+      )}
 
-<View style={styles.middleIconBox}>
-  <Image
-    source={{ uri: 'https://img.icons8.com/?size=100&id=Ckq67kItoLQa&format=png&color=000000' }}
-    style={styles.middleIcon}
-    resizeMode="contain"
-  />
-</View>
+      <View style={styles.middleIconBox}>
+        <Image
+          source={{ uri: 'https://img.icons8.com/?size=100&id=Ckq67kItoLQa&format=png&color=000000' }}
+          style={styles.middleIcon}
+          resizeMode="contain"
+        />
+      </View>
 
+      <View style={styles.cardWrapper}>
+        <Text style={styles.title}>{i18n.t('games.tombala.title')}</Text>
+        <View style={styles.cardBox}>
+          {card.map((row, i) => renderRow(row, i))}
+        </View>
+      </View>
 
-    <View style={styles.cardWrapper}>
-  <Text style={styles.title}> Tombala Kartı</Text>
-  <View style={styles.cardBox}>
-    {card.map((row, i) => renderRow(row, i))}
-  </View>
-</View>
-
-
-{gameOverData && (
-  <View style={styles.overlay}>
-    <Text style={styles.winTitle}>🏆 Tombala!</Text>
-    <Text style={styles.winText}>Kazanan: {gameOverData.winner.email}</Text>
-    <TouchableOpacity
-      style={styles.winButton}
-      onPress={() => navigation.navigate('Home')}
-    >
-      <Text style={styles.winButtonText}>Ana Sayfa</Text>
-    </TouchableOpacity>
-  </View>
-)}
-
-
+      {gameOverData && (
+        <View style={styles.overlay}>
+          <Text style={styles.winTitle}>🏆 {i18n.t('games.tombala.winnerTitle')}</Text>
+          <Text style={styles.winText}>{i18n.t('games.tombala.winnerText', { user: gameOverData.winner.email })}</Text>
+          <TouchableOpacity
+            style={styles.winButton}
+            onPress={() => navigation.navigate('Home')}
+          >
+            <Text style={styles.winButtonText}>{i18n.t('games.tombala.homeButton')}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -328,25 +316,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardWrapper: {
-  position: 'absolute',
-  bottom: 20,
-  alignItems: 'center',
-  width: '100%',
-},
-middleIconBox: {
-  position: 'absolute',
-  top: '45%',
-  left: '45%',
-  transform: [{ translateX: -40 }, { translateY: -40 }], // ikonu merkezlemek için
-  zIndex: 0,
-},
-middleIcon: {
-  width: 150,
-  height: 150,
-  opacity: 0.8, // hafif şeffaflık
-},
-
-
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+    width: '100%',
+  },
+  middleIconBox: {
+    position: 'absolute',
+    top: '45%',
+    left: '45%',
+    transform: [{ translateX: -40 }, { translateY: -40 }],
+    zIndex: 0,
+  },
+  middleIcon: {
+    width: 150,
+    height: 150,
+    opacity: 0.8,
+  },
   cellText: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   activeBox: {
     position: 'absolute', top: 40,
@@ -360,38 +346,50 @@ middleIcon: {
   },
   drawButtonText: { color: '#fff', fontWeight: 'bold' },
   overlay: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.75)',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: 20,
-  zIndex: 999,
-},
-winTitle: {
-  fontSize: 32,
-  fontWeight: 'bold',
-  color: '#fff',
-  marginBottom: 20,
-},
-winText: {
-  fontSize: 20,
-  color: '#fff',
-  marginBottom: 30,
-},
-winButton: {
-  backgroundColor: '#4CAF50',
-  paddingVertical: 12,
-  paddingHorizontal: 30,
-  borderRadius: 8,
-},
-winButtonText: {
-  color: '#fff',
-  fontSize: 16,
-  fontWeight: 'bold',
-},
-
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    zIndex: 999,
+  },
+  winTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
+  },
+  winText: {
+    fontSize: 20,
+    color: '#fff',
+    marginBottom: 30,
+  },
+  winButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  winButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  announcementBox: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    padding: 10,
+    zIndex: 999,
+  },
+  announcementText: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 5,
+  },
 });

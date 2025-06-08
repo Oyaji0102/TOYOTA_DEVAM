@@ -1,14 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import i18n from '../src/i18n/i18n';
 
 const AchievementsScreen = () => {
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   const achievements = [
-    { icon: '🎯', text: 'İlk oyun oynandı' },
-    { icon: '💪', text: '1000 skor elde edildi' },
-    { icon: '🔥', text: '2 saat kesintisiz oynama' },
+    { icon: '🎯', key: 'firstGame' },
+    { icon: '💪', key: 'score1000' },
+    { icon: '🔥', key: 'play2Hours' },
+    { icon: '🏆', key: 'win10Games' },
+    { icon: '🌟', key: 'completeAllGames' },
+    { icon: '⚡', key: 'quickWin' }
   ];
 
   return (
@@ -25,13 +31,16 @@ const AchievementsScreen = () => {
           },
         ]}
       >
-        🏆 Başarımlar
+        {i18n.t('achievements.title')}
       </Text>
 
       {achievements.map((item, index) => (
         <View key={index} style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
           <Text style={[styles.achievementText, { color: theme.text }]}>
-            {item.icon} {item.text}
+            {item.icon} {i18n.t(`achievements.${item.key}`)}
+          </Text>
+          <Text style={[styles.achievementStatus, { color: theme.subtext }]}>
+            {i18n.t('achievements.locked')}
           </Text>
         </View>
       ))}
@@ -62,6 +71,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
+  achievementStatus: {
+    fontSize: 14,
+    marginTop: 4,
+  }
 });
 
 export default AchievementsScreen;

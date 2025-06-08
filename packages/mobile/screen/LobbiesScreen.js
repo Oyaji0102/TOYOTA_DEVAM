@@ -10,6 +10,8 @@ import {
 import { LobbyContext } from '../context/LobbyContext';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import i18n from '../src/i18n/i18n';
 import createLobbyStyles from '../components/LobbyStyles'; // Güncellenmiş harici style dosyası
 
 const LobbiesScreen = () => {
@@ -51,18 +53,12 @@ const LobbiesScreen = () => {
       <View style={styles.card}>
         <Text style={styles.title}>{item.gameId} ({item.type})</Text>
         <Text style={{ color: theme.subtext }}>👤 {item.owner.email}</Text>
-        <Text style={{ color: theme.subtext }}>🔒 {item.isPrivate ? 'Şifreli' : 'Herkese Açık'}</Text>
+        <Text style={{ color: theme.subtext }}>🔒 {item.isPrivate ? i18n.t('lobby.private') : i18n.t('lobby.public')}</Text>
 
        {isJoined ? (
   <>
-    <TouchableOpacity
-      style={styles.leaveButton}
-      onPress={() => disconnectFromLobby()}
-    >
-      <Text style={styles.buttonText}>Çık</Text>
-    </TouchableOpacity>
 
-    <TouchableOpacity
+<TouchableOpacity
       style={[
         styles.joinButton,
         {
@@ -73,9 +69,18 @@ const LobbiesScreen = () => {
       onPress={toggleReady}
     >
       <Text style={styles.buttonText}>
-        {isReady ? 'Hazır Değilim' : 'Hazırım'}
+        {isReady ? i18n.t('lobby.notReady') : i18n.t('lobby.ready')}
       </Text>
     </TouchableOpacity>
+
+    <TouchableOpacity
+      style={styles.leaveButton}
+      onPress={() => disconnectFromLobby()}
+    >
+      <Text style={styles.buttonText}>{i18n.t('lobby.leave')}</Text>
+    </TouchableOpacity>
+
+    
   </>
 ) : (
   <TouchableOpacity
@@ -89,7 +94,7 @@ const LobbiesScreen = () => {
       }
     }}
   >
-    <Text style={styles.buttonText}>Katıl</Text>
+    <Text style={styles.buttonText}>{i18n.t('lobby.join')}</Text>
   </TouchableOpacity>
 )}
 
@@ -98,7 +103,7 @@ const LobbiesScreen = () => {
     style={styles.deleteButton}
     onPress={() => deleteLobby(item.id)}
   >
-    <Text style={styles.buttonText}>Sil</Text>
+    <Text style={styles.buttonText}>{i18n.t('common.delete')}</Text>
   </TouchableOpacity>
 )}
 
@@ -108,13 +113,13 @@ const LobbiesScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>🧩 Aktif Lobiler</Text>
+      <Text style={styles.heading}>{i18n.t('lobby.activeLobbies')}</Text>
 
       <FlatList
         data={lobbies}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        ListEmptyComponent={<Text style={{ color: theme.subtext }}>Henüz hiç lobi yok...</Text>}
+        ListEmptyComponent={<Text style={{ color: theme.subtext }}>{i18n.t('lobby.noLobbies')}</Text>}
         extraData={joinedLobby}
       />
 
@@ -127,9 +132,9 @@ const LobbiesScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>🔐 Şifreli Lobi</Text>
+            <Text style={styles.modalTitle}>🔐 {i18n.t('lobby.privateLobby')}</Text>
             <TextInput
-              placeholder="Lobi şifresi"
+              placeholder={i18n.t('lobby.passwordPlaceholder')}
               placeholderTextColor={theme.placeholder}
               secureTextEntry
               value={enteredPassword}
@@ -144,7 +149,7 @@ const LobbiesScreen = () => {
                 setEnteredPassword('');
               }}
             >
-              <Text style={styles.buttonText}>Katıl</Text>
+              <Text style={styles.buttonText}>{i18n.t('lobby.join')}</Text>
             </TouchableOpacity>
           </View>
         </View>

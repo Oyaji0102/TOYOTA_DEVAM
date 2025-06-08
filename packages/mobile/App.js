@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import { LobbyProvider } from './context/LobbyContext';
 import { GameProvider } from './context/GameContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext'; // doğru yol
 
 import Navigation from './Navigation';
 import LobbyJoinedModal from './components/LobbyJoinedModal';
@@ -37,8 +38,10 @@ export default function App() {
       <LobbyProvider>
         <GameProvider>
           <ThemeProvider>
-            <LobbyJoinedModal />
-            <Navigation />
+            <LanguageProvider>
+              <LobbyJoinedModal />
+              <Navigation />
+            </LanguageProvider>
           </ThemeProvider>
         </GameProvider>
       </LobbyProvider>

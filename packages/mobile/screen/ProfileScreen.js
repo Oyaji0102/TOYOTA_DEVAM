@@ -2,10 +2,13 @@ import React, { useContext } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import i18n from '../src/i18n/i18n';
 
 const ProfileScreen = () => {
   const { user } = useContext(AuthContext);
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -21,17 +24,32 @@ const ProfileScreen = () => {
           },
         ]}
       >
-        👤 Profilim
+        {i18n.t('profile.title')}
       </Text>
 
       <View style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
-        <Text style={[styles.label, { color: theme.subtext }]}>E-posta</Text>
+        <Text style={[styles.label, { color: theme.subtext }]}>{i18n.t('profile.email')}</Text>
         <Text style={[styles.value, { color: theme.text }]}>{user?.email}</Text>
       </View>
 
       <View style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
-        <Text style={[styles.label, { color: theme.subtext }]}>Kullanıcı ID</Text>
+        <Text style={[styles.label, { color: theme.subtext }]}>{i18n.t('profile.userId')}</Text>
         <Text style={[styles.value, { color: theme.text }]}>{user?.id}</Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
+        <Text style={[styles.label, { color: theme.subtext }]}>{i18n.t('profile.stats')}</Text>
+        <Text style={[styles.value, { color: theme.text }]}>{i18n.t('profile.viewStats')}</Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
+        <Text style={[styles.label, { color: theme.subtext }]}>{i18n.t('profile.achievements')}</Text>
+        <Text style={[styles.value, { color: theme.text }]}>{i18n.t('profile.viewAchievements')}</Text>
+      </View>
+
+      <View style={[styles.card, { backgroundColor: theme.surface, shadowColor: theme.shadow }]}>
+        <Text style={[styles.label, { color: theme.subtext }]}>{i18n.t('profile.history')}</Text>
+        <Text style={[styles.value, { color: theme.text }]}>{i18n.t('profile.viewHistory')}</Text>
       </View>
     </View>
   );

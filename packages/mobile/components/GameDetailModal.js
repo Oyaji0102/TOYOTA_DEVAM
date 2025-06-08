@@ -5,11 +5,14 @@ import { LobbyContext } from '../context/LobbyContext';
 import { GameContext } from '../context/GameContext';
 import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
+import i18n from '../src/i18n/i18n';
 
 const GameDetailModal = () => {
   const { selectedGame, setSelectedGame } = useContext(GameContext);
   const { openLobbyModal, lobbies, setSkipGameSelection } = useContext(LobbyContext);
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   if (!selectedGame) return null;
 
@@ -29,33 +32,33 @@ const GameDetailModal = () => {
 
             <View style={styles.sectionHeader}>
               <Feather name="info" size={18} color={theme.text} style={styles.icon} />
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>Oyun Hakkında</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('gameDetail.about')}</Text>
             </View>
             <Text style={[styles.text, { color: theme.text }]}>{selectedGame.description}</Text>
 
             <View style={styles.sectionHeader}>
               <Feather name="users" size={18} color={theme.text} style={styles.icon} />
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>Aktif Lobiler</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('gameDetail.activeLobbies')}</Text>
             </View>
             {relatedLobbies.length > 0 ? relatedLobbies.map(l => (
               <Text key={l.id} style={[styles.text, { color: theme.text }]}>- {l.id}</Text>
-            )) : <Text style={[styles.text, { color: theme.subtext }]}>Aktif lobi bulunamadı.</Text>}
+            )) : <Text style={[styles.text, { color: theme.subtext }]}>{i18n.t('gameDetail.noActiveLobbies')}</Text>}
 
             <View style={styles.sectionHeader}>
               <Feather name="clock" size={18} color={theme.text} style={styles.icon} />
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>Oyun Geçmişi</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('gameDetail.history')}</Text>
             </View>
             <Text style={[styles.text, { color: theme.text }]}>{selectedGame.history}</Text>
 
             <View style={styles.sectionHeader}>
               <MaterialCommunityIcons name="gamepad-variant-outline" size={18} color={theme.text} style={styles.icon} />
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>Nasıl Oynanır</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('gameDetail.howToPlay')}</Text>
             </View>
             <Text style={[styles.text, { color: theme.text }]}>{selectedGame.howToPlay}</Text>
 
             <View style={styles.sectionHeader}>
               <Feather name="settings" size={18} color={theme.text} style={styles.icon} />
-              <Text style={[styles.sectionTitle, { color: theme.text }]}>Ayarlar</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>{i18n.t('gameDetail.settings')}</Text>
             </View>
             <Text style={[styles.text, { color: theme.text }]}>{selectedGame.settings}</Text>
 
@@ -66,11 +69,11 @@ const GameDetailModal = () => {
                 openLobbyModal();
               }}
             >
-              <Text style={styles.buttonText}>Lobi Oluştur</Text>
+              <Text style={styles.buttonText}>{i18n.t('gameDetail.createLobby')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setSelectedGame(null)} style={styles.closeButton}>
-              <Text style={styles.closeText}>Kapat</Text>
+              <Text style={styles.closeText}>{i18n.t('gameDetail.close')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
