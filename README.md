@@ -8,6 +8,8 @@ DOSYA ÇALIŞTIRMA YOLU:
 terminal cmd>
 
 cd gamecenter  ---------> npm install
+
+
 cd gamecenter  --------- >npm run start
 
 ÖNEMLİ NOT::
