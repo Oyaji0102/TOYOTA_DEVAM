@@ -16,5 +16,5 @@ cd gamecenter  --------- >npm run start
 Github sayfamdaki Repostories kısmındaki game reposuyla beraber çalışmaktadır aynı dosya içerisinde kurmanızı tavsiye ederim.
 
 
-Bu şekilde hem backend hemde mobil kısmı(espo) çalışmış olur.
+Bu şekilde hem backend hemde mobil kısmı(expo) çalışmış olur.
 
